@@ -1,4 +1,6 @@
 mod engine;
+mod fullscreen;
+mod overlay;
 mod pipe;
 mod statusline;
 mod wrap;
@@ -33,6 +35,11 @@ fn get_snapshot(state: tauri::State<'_, engine::SnapshotState>) -> si_core::mode
     state.0.lock().unwrap().clone()
 }
 
+#[tauri::command]
+fn set_island_rect(rect: overlay::IslandRect, state: tauri::State<'_, overlay::OverlayState>) {
+    *state.0.lock().unwrap() = rect;
+}
+
 fn run_app() {
     let initial = si_core::model::Snapshot {
         now_ms: 0,
@@ -43,11 +50,15 @@ fn run_app() {
     };
     let state = engine::SnapshotState(std::sync::Arc::new(std::sync::Mutex::new(initial)));
     let thread_state = state.clone();
+    let overlay_state = overlay::OverlayState::default();
+    let overlay_thread_state = overlay_state.clone();
     tauri::Builder::default()
         .manage(state)
-        .invoke_handler(tauri::generate_handler![get_snapshot])
+        .manage(overlay_state)
+        .invoke_handler(tauri::generate_handler![get_snapshot, set_island_rect])
         .setup(move |app| {
             engine::start(app.handle().clone(), thread_state.clone());
+            overlay::start(app.handle().clone(), overlay_thread_state.clone());
             Ok(())
         })
         .run(tauri::generate_context!())

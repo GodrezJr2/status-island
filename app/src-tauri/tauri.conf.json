@@ -10,7 +10,7 @@
     "frontendDist": "../dist"
   },
   "app": {
-    "windows": [{ "label": "main", "title": "Status Island", "width": 460, "height": 520, "visible": false }]
+    "windows": [{ "label": "main", "title": "Status Island", "width": 460, "height": 520, "visible": false, "transparent": true, "decorations": false, "alwaysOnTop": true, "skipTaskbar": true, "focusable": false, "shadow": false }]
   },
   "bundle": { "active": false }
 }
