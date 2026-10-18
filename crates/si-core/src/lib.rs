@@ -3,6 +3,8 @@
 
 pub mod claude;
 pub mod codex;
+pub mod estimate;
+pub mod live;
 pub mod model;
 pub mod opencode;
 pub mod tail;
