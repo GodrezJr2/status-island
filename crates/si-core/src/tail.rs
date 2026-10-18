@@ -16,14 +16,22 @@ pub struct Tail {
 
 impl Tail {
     pub fn from_start(path: &Path) -> Tail {
-        Tail { path: path.to_path_buf(), pos: 0, buf: String::new() }
+        Tail {
+            path: path.to_path_buf(),
+            pos: 0,
+            buf: String::new(),
+        }
     }
 
     /// Starts `prime_bytes` before the end and returns the complete lines found there.
     pub fn from_end(path: &Path, prime_bytes: u64) -> io::Result<(Tail, Vec<serde_json::Value>)> {
         let size = std::fs::metadata(path)?.len();
         let start = size.saturating_sub(prime_bytes);
-        let mut t = Tail { path: path.to_path_buf(), pos: start, buf: String::new() };
+        let mut t = Tail {
+            path: path.to_path_buf(),
+            pos: start,
+            buf: String::new(),
+        };
         let mut lines = t.read_new()?;
         // Starting mid-file means the first line is a fragment; parsing it may even succeed by accident.
         if start > 0 && !lines.is_empty() && !t.started_on_line_boundary(start)? {
@@ -86,7 +94,11 @@ mod tests {
     }
 
     fn append(path: &std::path::Path, s: &str) {
-        let mut f = std::fs::OpenOptions::new().create(true).append(true).open(path).unwrap();
+        let mut f = std::fs::OpenOptions::new()
+            .create(true)
+            .append(true)
+            .open(path)
+            .unwrap();
         f.write_all(s.as_bytes()).unwrap();
     }
 
@@ -126,9 +138,15 @@ mod tests {
         drop(f);
         let (mut t, lines) = Tail::from_end(&p, 2_000_000).unwrap();
         let line_len = written / n;
-        assert!((lines.len() as u64) * line_len <= 2_000_000, "read more than the primed bytes");
+        assert!(
+            (lines.len() as u64) * line_len <= 2_000_000,
+            "read more than the primed bytes"
+        );
         assert!(!lines.is_empty());
         assert_eq!(lines.last().unwrap()["i"], serde_json::json!(n - 1));
-        assert!(t.read_new().unwrap().is_empty(), "nothing new after priming");
+        assert!(
+            t.read_new().unwrap().is_empty(),
+            "nothing new after priming"
+        );
     }
 }

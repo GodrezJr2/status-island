@@ -4,23 +4,42 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase")]
-pub enum AgentKind { Claude, Codex, OpenCode }
+pub enum AgentKind {
+    Claude,
+    Codex,
+    OpenCode,
+}
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
-pub enum Surface { Terminal, VsCode, Unknown }
+pub enum Surface {
+    Terminal,
+    VsCode,
+    Unknown,
+}
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
-pub enum Activity { Working, Waiting, Idle }
+pub enum Activity {
+    Working,
+    Waiting,
+    Idle,
+}
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq, Hash)]
 #[serde(rename_all = "camelCase")]
-pub enum WindowKind { FiveHour, Weekly }
+pub enum WindowKind {
+    FiveHour,
+    Weekly,
+}
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
-pub enum Source { StatusLine, Wrapper, CodexRollout }
+pub enum Source {
+    StatusLine,
+    Wrapper,
+    CodexRollout,
+}
 
 /// One exact limit reading from an official source.
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
@@ -34,7 +53,12 @@ pub struct Reading {
 
 #[derive(Serialize, Deserialize, Clone, Copy, Debug, PartialEq, Eq)]
 #[serde(rename_all = "camelCase")]
-pub enum Freshness { Exact, Estimated, Stale, Unknown }
+pub enum Freshness {
+    Exact,
+    Estimated,
+    Stale,
+    Unknown,
+}
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(rename_all = "camelCase")]
@@ -105,7 +129,10 @@ pub fn model_label(id: &str) -> String {
             format!("{} {}.{}", title(family), major, minor)
         }
         // OpenAI names keep their own casing after the prefix.
-        ["gpt", rest @ ..] => std::iter::once("GPT").chain(rest.iter().copied()).collect::<Vec<_>>().join(" "),
+        ["gpt", rest @ ..] => std::iter::once("GPT")
+            .chain(rest.iter().copied())
+            .collect::<Vec<_>>()
+            .join(" "),
         _ => parts.iter().map(|p| brand(p)).collect::<Vec<_>>().join(" "),
     }
 }

@@ -11,3 +11,4 @@ research_notes/
 target/
 node_modules/
 dist/
+.toolchain/
