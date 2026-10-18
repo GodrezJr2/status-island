@@ -8,4 +8,5 @@ pub mod estimate;
 pub mod live;
 pub mod model;
 pub mod opencode;
+pub mod scan;
 pub mod tail;
