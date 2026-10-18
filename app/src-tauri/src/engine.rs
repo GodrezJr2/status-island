@@ -1,6 +1,7 @@
 use notify::{RecursiveMode, Watcher};
 use si_core::{
-    model::Snapshot,
+    alerts::AlertEngine,
+    model::{AgentKind, Snapshot, WindowKind},
     scan::{default_roots, ExternalReading, Scanner},
 };
 use std::{
@@ -24,6 +25,13 @@ pub fn start(app: AppHandle, state: SnapshotState) {
         .unwrap_or_default();
     let roots = default_roots(&home);
     let (tx, rx) = mpsc::channel();
+    let (push_tx, push_rx) =
+        mpsc::channel::<(status_island::ntfy::NtfyConfig, si_core::alerts::Alert)>();
+    std::thread::spawn(move || {
+        for (cfg, alert) in push_rx {
+            let _ = status_island::ntfy::send(&cfg, &alert);
+        }
+    });
     crate::pipe::serve(tx.clone());
     std::thread::spawn(move || {
         let notify_tx = tx.clone();
@@ -56,6 +64,7 @@ pub fn start(app: AppHandle, state: SnapshotState) {
             }
         }
         let mut scanner = Scanner::new(roots);
+        let mut alerts = AlertEngine::default();
         loop {
             let signal = rx.recv_timeout(Duration::from_secs(1));
             let woke = signal.is_ok();
@@ -75,8 +84,44 @@ pub fn start(app: AppHandle, state: SnapshotState) {
                 .map(|d| d.as_millis() as i64)
                 .unwrap_or(0);
             let snapshot = scanner.tick(now_ms);
+            alerts.set_overage_disabled(AgentKind::Claude, snapshot.claude.overage_disabled);
+            for (agent, account) in [
+                (AgentKind::Claude, &snapshot.claude),
+                (AgentKind::Codex, &snapshot.codex),
+            ] {
+                let project = snapshot
+                    .sessions
+                    .iter()
+                    .find(|s| s.kind == agent)
+                    .map(|s| s.project.as_str())
+                    .unwrap_or("");
+                for (window, view) in [
+                    (WindowKind::FiveHour, &account.five_hour),
+                    (WindowKind::Weekly, &account.weekly),
+                ] {
+                    if let Some(view) = view {
+                        for alert in alerts.evaluate(agent, window, view, project, now_ms) {
+                            if status_island::away::is_away() {
+                                if let Some(cfg) = paired_ntfy_config() {
+                                    let _ = push_tx.send((cfg, alert.clone()));
+                                }
+                            } else {
+                                let _ = app.emit("alert", alert);
+                            }
+                        }
+                    }
+                }
+            }
             *state.0.lock().unwrap() = snapshot.clone();
             let _ = app.emit("snapshot", snapshot);
         }
     });
+}
+
+fn paired_ntfy_config() -> Option<status_island::ntfy::NtfyConfig> {
+    let path = PathBuf::from(std::env::var_os("LOCALAPPDATA")?).join("StatusIsland/config.json");
+    let value: serde_json::Value = serde_json::from_slice(&std::fs::read(path).ok()?).ok()?;
+    let cfg: status_island::ntfy::NtfyConfig =
+        serde_json::from_value(value.get("ntfy")?.clone()).ok()?;
+    (!cfg.topic.is_empty()).then_some(cfg)
 }

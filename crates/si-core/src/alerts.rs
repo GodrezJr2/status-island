@@ -1,8 +1,10 @@
 use crate::model::{AgentKind, WindowKind, WindowView};
 use chrono::{Local, TimeZone};
+use serde::{Deserialize, Serialize};
 use std::collections::{HashMap, HashSet};
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum AlertKind {
     Left50,
     Left20,
@@ -13,14 +15,16 @@ pub enum AlertKind {
     TaskFinished,
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub enum Level {
     Warn,
     Crit,
     Info,
 }
 
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct Alert {
     pub agent: AgentKind,
     pub kind: AlertKind,
