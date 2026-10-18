@@ -1,0 +1,13 @@
+# Throwaway tests and other agents' work (not part of Status Island)
+spike-demo/
+.spike-wrapper/
+reports/
+research_notes/
+.agent/
+.tmp/
+.claude/settings.local.json
+
+# Build output
+target/
+node_modules/
+dist/
