@@ -1,0 +1,31 @@
+{
+  "session_id": "<id>",
+  "model": {
+    "id": "claude-opus-5-5",
+    "display_name": "Opus 5.5"
+  },
+  "workspace": {
+    "current_dir": "C:\\\\Users\\\\dev\\\\project"
+  },
+  "context_window": {
+    "context_window_size": 1000000,
+    "used_percentage": 6,
+    "remaining_percentage": 94,
+    "current_usage": {
+      "input_tokens": 2,
+      "output_tokens": 300,
+      "cache_creation_input_tokens": 1494,
+      "cache_read_input_tokens": 41500
+    }
+  },
+  "rate_limits": {
+    "five_hour": {
+      "used_percentage": 27,
+      "resets_at": 1792329000
+    },
+    "seven_day": {
+      "used_percentage": 47,
+      "resets_at": 1792648800
+    }
+  }
+}

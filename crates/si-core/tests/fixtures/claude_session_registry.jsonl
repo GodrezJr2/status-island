@@ -1,0 +1,22 @@
+{
+  "pid": 14132,
+  "sessionId": "616582c8-31e3-4ca0-bc23-3a11dbf29cd0",
+  "cwd": "C:\\\\Users\\\\dev\\\\project",
+  "startedAt": 1792316728522,
+  "procStart": "134367903253677432",
+  "version": "2.1.302",
+  "peerProtocol": 1,
+  "peerFeatures": [
+    "notify_idle",
+    "artifact_yield"
+  ],
+  "kind": "interactive",
+  "entrypoint": "cli",
+  "pidDomain": "win32:<host>",
+  "name": "<name>",
+  "nameSource": "derived",
+  "nameSince": 1792316728522,
+  "status": "idle",
+  "updatedAt": 1792316744288,
+  "statusUpdatedAt": 1792316744288
+}
