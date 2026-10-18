@@ -7,9 +7,11 @@ license.workspace = true
 [dependencies]
 si-core = { path = "../../crates/si-core" }
 serde_json = "1"
+serde = { version = "1", features = ["derive"] }
 windows = { version = "0.62", features = ["Win32_Foundation", "Win32_System_JobObjects", "Win32_System_Threading", "Win32_System_Pipes", "Win32_System_IO", "Win32_Storage_FileSystem", "Win32_System_Environment", "Win32_Security"] }
 tauri = "2"
 notify = "8"
+jsonc-parser = { version = "0.34", features = ["cst", "serde"] }
 
 [build-dependencies]
 tauri-build = "2"
