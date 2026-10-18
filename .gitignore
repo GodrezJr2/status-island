@@ -12,3 +12,4 @@ target/
 node_modules/
 dist/
 .toolchain/
+app/src-tauri/gen/

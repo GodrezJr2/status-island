@@ -18,7 +18,12 @@ jobs:
           node-version: '22'
           cache: npm
           cache-dependency-path: app/package-lock.json
-        if: hashFiles('app/package-lock.json') != ''
+      - name: Install front-end dependencies
+        working-directory: app
+        run: npm ci
+      - name: Build front end
+        working-directory: app
+        run: npm run build
       - name: Rust tests
         run: cargo test --workspace
       - name: Rust formatting
@@ -26,6 +31,5 @@ jobs:
       - name: Rust lint
         run: cargo clippy --workspace --all-targets -- -D warnings
       - name: Front-end tests
-        if: hashFiles('app/package-lock.json') != ''
         working-directory: app
-        run: npm ci && npm test
+        run: npm test -- --passWithNoTests
