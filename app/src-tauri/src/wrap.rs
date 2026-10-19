@@ -32,7 +32,10 @@ pub fn run(args: impl Iterator<Item = OsString>, skip_raw_tokens: usize) -> i32 
     } else {
         command.args(args);
     }
+    // CREATE_NO_WINDOW: this exe is a GUI program, so a console child would otherwise get
+    // its own visible console window. VS Code starts Claude the same hidden way.
     let mut child = match command
+        .creation_flags(0x0800_0000)
         .stdin(Stdio::piped())
         .stdout(Stdio::piped())
         .stderr(Stdio::piped())

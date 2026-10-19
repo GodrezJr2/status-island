@@ -25,6 +25,7 @@ pub fn run() -> i32 {
         return 0;
     }
     let Ok(mut child) = Command::new("cmd")
+        .creation_flags(0x0800_0000) // CREATE_NO_WINDOW: no console flash from a GUI program
         .args(["/S", "/C"])
         .raw_arg(format!("\"{command}\""))
         .stdin(Stdio::piped())
