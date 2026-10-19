@@ -1,4 +1,12 @@
-use status_island::config::{load_from, push_allowed, save_to, Config};
+use status_island::config::{load_from, push_allowed, save_to, AlertPrefs, Config};
+use status_island::ntfy::NtfyConfig;
+
+fn paired() -> NtfyConfig {
+    NtfyConfig {
+        topic: "si-test".into(),
+        ..NtfyConfig::default()
+    }
+}
 
 fn tmp(name: &str) -> std::path::PathBuf {
     let d = std::env::temp_dir().join(format!("si-config-{}-{}", name, std::process::id()));
@@ -17,12 +25,17 @@ fn config_roundtrip_and_defaults() {
     assert!(!defaults.onboarded);
     assert!(defaults.quiet_hours.is_none());
 
-    let mut cfg = Config::default();
-    cfg.offset_x = -40;
-    cfg.quiet_hours = Some([22, 7]);
-    cfg.ntfy.topic = "si-test".into();
-    cfg.prefs.task_finished = true;
-    cfg.onboarded = true;
+    let cfg = Config {
+        offset_x: -40,
+        quiet_hours: Some([22, 7]),
+        ntfy: paired(),
+        prefs: AlertPrefs {
+            task_finished: true,
+            ..AlertPrefs::default()
+        },
+        onboarded: true,
+        ..Config::default()
+    };
     save_to(&path, &cfg).unwrap();
     assert_eq!(load_from(&path), cfg);
 
@@ -36,8 +49,10 @@ fn config_roundtrip_and_defaults() {
 
 #[test]
 fn quiet_hours_suppress_push() {
-    let mut cfg = Config::default();
-    cfg.ntfy.topic = "si-test".into();
+    let mut cfg = Config {
+        ntfy: paired(),
+        ..Config::default()
+    };
     assert!(push_allowed(&cfg, 23, 0));
 
     cfg.quiet_hours = Some([22, 7]); // overnight window
