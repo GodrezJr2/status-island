@@ -140,3 +140,65 @@ fn copy_matches_spec() {
         .body
         .starts_with("Hard stop until "));
 }
+
+// Wording approved by the owner on 2026-10-19 (answers to docs/questions.md).
+#[test]
+fn owner_approved_copy() {
+    let reset = 1_792_329_000_000;
+    let mut e = AlertEngine::default();
+    let left = e.evaluate(
+        AgentKind::Claude,
+        WindowKind::FiveHour,
+        &view(10.0, reset, 0.0, None),
+        "Demo",
+        0,
+    );
+    let fifty = left.iter().find(|a| a.kind == AlertKind::Left50).unwrap();
+    assert_eq!(fifty.title, "Claude Code · 50% left");
+    assert!(fifty.body.starts_with("5-hour limit · resets "));
+    assert!(!fifty.body.contains("review model usage"));
+    let ten = left.iter().find(|a| a.kind == AlertKind::Left10).unwrap();
+    assert_eq!(ten.title, "Claude Code · 10% left");
+    assert!(ten.body.ends_with(" · pause or switch to a lighter model"));
+
+    let reached = e.evaluate(
+        AgentKind::Claude,
+        WindowKind::FiveHour,
+        &view(0.0, reset, 0.0, None),
+        "Demo",
+        11 * 60_000,
+    );
+    let r = reached
+        .iter()
+        .find(|a| a.kind == AlertKind::LimitReached)
+        .unwrap();
+    assert_eq!(r.title, "Claude Code · limit reached");
+    assert!(r.body.starts_with("Resets "), "got {}", r.body);
+
+    let fast = e.evaluate(
+        AgentKind::Codex,
+        WindowKind::FiveHour,
+        &view(50.0, reset, 2.4, Some(20.0)),
+        "VWMS",
+        0,
+    );
+    let f = fast
+        .iter()
+        .find(|a| a.kind == AlertKind::FastDrain)
+        .unwrap();
+    assert_eq!(f.body, "~2.4%/min on VWMS · ~20 min left at this pace");
+
+    let weekly = e.evaluate(
+        AgentKind::Codex,
+        WindowKind::Weekly,
+        &view(20.0, reset, 0.0, None),
+        "VWMS",
+        0,
+    );
+    assert!(weekly
+        .iter()
+        .find(|a| a.kind == AlertKind::Left20)
+        .unwrap()
+        .body
+        .starts_with("Weekly limit · resets "));
+}

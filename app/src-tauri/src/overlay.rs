@@ -46,7 +46,14 @@ pub fn start(app: tauri::AppHandle, state: OverlayState) {
             inside: false,
             down: false,
         };
-        let mut last_monitor = String::new();
+        let mut cfg = status_island::config::load();
+        reposition(&window, &cfg);
+        let mut last_monitor = window
+            .current_monitor()
+            .ok()
+            .flatten()
+            .map(|m| format!("{:?}", m.name()))
+            .unwrap_or_default();
         let mut last_fullscreen = false;
         let mut ticks = 0u32;
         loop {
@@ -79,10 +86,14 @@ pub fn start(app: tauri::AppHandle, state: OverlayState) {
             }
             ticks = ticks.wrapping_add(1);
             if ticks.is_multiple_of(20) {
+                let latest = status_island::config::load();
+                let settings_changed =
+                    latest.monitor != cfg.monitor || latest.offset_x != cfg.offset_x;
+                cfg = latest;
                 if let Some(current) = window.current_monitor().ok().flatten() {
                     let monitor_id = format!("{:?}", current.name());
-                    if monitor_id != last_monitor {
-                        reposition(&window);
+                    if monitor_id != last_monitor || settings_changed {
+                        reposition(&window, &cfg);
                         last_monitor = monitor_id;
                     }
                     let fullscreen = crate::fullscreen::fullscreen_active(&current);
@@ -101,7 +112,12 @@ pub fn start(app: tauri::AppHandle, state: OverlayState) {
     });
 }
 
-fn reposition(window: &tauri::WebviewWindow) {
+fn reposition(window: &tauri::WebviewWindow, cfg: &status_island::config::Config) {
+    let choice = if cfg.monitor == "active" {
+        MonitorChoice::Active
+    } else {
+        MonitorChoice::Fixed(cfg.monitor.clone())
+    };
     let Ok(monitors) = window.available_monitors() else {
         return;
     };
@@ -146,7 +162,7 @@ fn reposition(window: &tauri::WebviewWindow) {
         } else {
             None
         };
-    if let Some(target) = place(&info, MonitorChoice::Active, 0, taskbar).first() {
+    if let Some(target) = place(&info, choice, cfg.offset_x, taskbar).first() {
         let _ = window.set_size(PhysicalSize::new(target.w, target.h));
         let _ = window.set_position(PhysicalPosition::new(target.x, target.y));
         let _ = window.show();

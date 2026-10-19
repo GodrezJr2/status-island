@@ -93,7 +93,7 @@ impl AlertEngine {
         };
         let window_label = match window {
             WindowKind::FiveHour => "5-hour",
-            WindowKind::Weekly => "weekly",
+            WindowKind::Weekly => "Weekly",
         };
         let mut alerts = Vec::new();
         for kind in candidates {
@@ -109,7 +109,7 @@ impl AlertEngine {
             let (title, body, priority, level) = match kind {
                 AlertKind::Left50 => (
                     format!("{name} · 50% left"),
-                    format!("{window_label} limit · resets {reset} · review model usage"),
+                    format!("{window_label} limit · resets {reset}"),
                     3,
                     Level::Info,
                 ),
@@ -121,7 +121,9 @@ impl AlertEngine {
                 ),
                 AlertKind::Left10 => (
                     format!("{name} · 10% left"),
-                    format!("{window_label} limit · resets {reset} · review model usage"),
+                    format!(
+                        "{window_label} limit · resets {reset} · pause or switch to a lighter model"
+                    ),
                     4,
                     Level::Crit,
                 ),
@@ -129,16 +131,18 @@ impl AlertEngine {
                     let body = if *self.overage_disabled.get(&agent).unwrap_or(&false) {
                         format!("Hard stop until {reset} (org overage off)")
                     } else {
-                        format!("Limit reached · resets {reset}")
+                        format!("Resets {reset}")
                     };
                     (format!("{name} · limit reached"), body, 5, Level::Crit)
                 }
                 AlertKind::FastDrain => {
-                    let pts = (view.burn_pts_per_min * 5.0).round() as u32;
                     let eta = view.minutes_to_empty.unwrap_or(0.0).round() as u32;
                     (
                         format!("{name} · draining fast"),
-                        format!("{pts}% used in 5 min on {project} · ~{eta} min left at this pace"),
+                        format!(
+                            "~{:.1}%/min on {project} · ~{eta} min left at this pace",
+                            view.burn_pts_per_min
+                        ),
                         4,
                         Level::Warn,
                     )

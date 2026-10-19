@@ -63,7 +63,8 @@ pub fn start(app: AppHandle, state: SnapshotState) {
                 }
             }
         }
-        let mut scanner = Scanner::new(roots);
+        let mut scanner =
+            Scanner::with_probe(roots, Box::new(status_island::procprobe::Win32Probe));
         let mut alerts = AlertEngine::default();
         loop {
             let signal = rx.recv_timeout(Duration::from_secs(1));
@@ -102,8 +103,9 @@ pub fn start(app: AppHandle, state: SnapshotState) {
                     if let Some(view) = view {
                         for alert in alerts.evaluate(agent, window, view, project, now_ms) {
                             if status_island::away::is_away() {
-                                if let Some(cfg) = paired_ntfy_config() {
-                                    let _ = push_tx.send((cfg, alert.clone()));
+                                let cfg = status_island::config::load();
+                                if status_island::config::push_allowed(&cfg, local_hour(), now_ms) {
+                                    let _ = push_tx.send((cfg.ntfy, alert.clone()));
                                 }
                             } else {
                                 let _ = app.emit("alert", alert);
@@ -118,10 +120,7 @@ pub fn start(app: AppHandle, state: SnapshotState) {
     });
 }
 
-fn paired_ntfy_config() -> Option<status_island::ntfy::NtfyConfig> {
-    let path = PathBuf::from(std::env::var_os("LOCALAPPDATA")?).join("StatusIsland/config.json");
-    let value: serde_json::Value = serde_json::from_slice(&std::fs::read(path).ok()?).ok()?;
-    let cfg: status_island::ntfy::NtfyConfig =
-        serde_json::from_value(value.get("ntfy")?.clone()).ok()?;
-    (!cfg.topic.is_empty()).then_some(cfg)
+fn local_hour() -> u8 {
+    let now = unsafe { windows::Win32::System::SystemInformation::GetLocalTime() };
+    now.wHour as u8
 }

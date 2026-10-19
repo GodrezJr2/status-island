@@ -42,7 +42,24 @@ struct CodexState {
     last_total: u64,
 }
 
+/// Decides whether a Claude session's process is still the same live process.
+/// `proc_start` is the registry's `procStart` (Windows process-creation FILETIME),
+/// which guards against a reused PID. The app supplies a Win32 implementation.
+pub trait ProcessProbe: Send {
+    fn is_live(&self, pid: u32, proc_start: Option<&str>) -> bool;
+}
+
+/// Fallback used by `Scanner::new` (tests, non-app callers). It cannot check `procStart`.
+struct TasklistProbe;
+
+impl ProcessProbe for TasklistProbe {
+    fn is_live(&self, pid: u32, _proc_start: Option<&str>) -> bool {
+        pid_alive(pid)
+    }
+}
+
 pub struct Scanner {
+    probe: Box<dyn ProcessProbe>,
     roots: Roots,
     tails: HashMap<PathBuf, Tail>,
     codex_states: HashMap<PathBuf, CodexState>,
@@ -59,7 +76,7 @@ pub struct Scanner {
 pub fn default_roots(home: &Path) -> Roots {
     let (tx, rx) = mpsc::channel();
     std::thread::spawn(move || {
-        let _ = tx.send(Command::new("wsl.exe").args(["-l", "-q"]).output());
+        let _ = tx.send(hidden(Command::new("wsl.exe").args(["-l", "-q"])).output());
     });
     let distros = rx
         .recv_timeout(Duration::from_millis(500))
@@ -115,7 +132,12 @@ where
 
 impl Scanner {
     pub fn new(roots: Roots) -> Self {
+        Self::with_probe(roots, Box::new(TasklistProbe))
+    }
+
+    pub fn with_probe(roots: Roots, probe: Box<dyn ProcessProbe>) -> Self {
         Self {
+            probe,
             roots,
             tails: HashMap::new(),
             codex_states: HashMap::new(),
@@ -236,10 +258,9 @@ impl Scanner {
             let Some(s) = claude::parse_session_file(&v) else {
                 continue;
             };
-            if !pid_alive(s.pid) {
+            if !self.probe.is_live(s.pid, s.proc_start.as_deref()) {
                 continue;
             }
-            // TODO(owner): verify procStart against the live process creation time before showing a reused PID.
             let mut latest = self.claude_turns.get(&s.session_id).cloned();
             if let Ok(projects) = fs::read_dir(root.join("projects")) {
                 for project in projects.flatten() {
@@ -438,6 +459,16 @@ fn project_name(path: &Path) -> String {
         .to_owned()
 }
 
+/// Child processes from a GUI app would otherwise flash a console window.
+fn hidden(cmd: &mut Command) -> &mut Command {
+    #[cfg(windows)]
+    {
+        use std::os::windows::process::CommandExt;
+        cmd.creation_flags(0x0800_0000); // CREATE_NO_WINDOW
+    }
+    cmd
+}
+
 fn pid_alive(pid: u32) -> bool {
     if pid == std::process::id() {
         return true;
@@ -445,8 +476,7 @@ fn pid_alive(pid: u32) -> bool {
     if pid == 0 || pid == u32::MAX {
         return false;
     }
-    Command::new("tasklist")
-        .args(["/FI", &format!("PID eq {pid}"), "/FO", "CSV", "/NH"])
+    hidden(Command::new("tasklist").args(["/FI", &format!("PID eq {pid}"), "/FO", "CSV", "/NH"]))
         .output()
         .ok()
         .filter(|o| o.status.success())

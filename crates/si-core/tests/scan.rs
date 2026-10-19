@@ -108,6 +108,41 @@ fn dead_pid_hidden() {
     fs::remove_dir_all(home).unwrap();
 }
 
+/// Records what the scanner asks, and treats only one creation time as the live process.
+struct FakeProbe(std::sync::Arc<std::sync::Mutex<Vec<(u32, Option<String>)>>>);
+impl si_core::scan::ProcessProbe for FakeProbe {
+    fn is_live(&self, pid: u32, proc_start: Option<&str>) -> bool {
+        self.0
+            .lock()
+            .unwrap()
+            .push((pid, proc_start.map(str::to_owned)));
+        proc_start == Some("134367903253677432")
+    }
+}
+
+#[test]
+fn reused_pid_hidden_via_proc_start() {
+    let home = root();
+    let claude = home.join(".claude");
+    write(&claude.join("sessions/same.json"), &json!({"pid":4242,"sessionId":"same","cwd":"C:/safe/a","entrypoint":"cli","status":"busy","procStart":"134367903253677432"}).to_string());
+    write(&claude.join("sessions/reused.json"), &json!({"pid":4243,"sessionId":"reused","cwd":"C:/safe/b","entrypoint":"cli","status":"busy","procStart":"999"}).to_string());
+    let calls = std::sync::Arc::new(std::sync::Mutex::new(Vec::new()));
+    let mut scanner = Scanner::with_probe(
+        Roots {
+            claude: vec![claude],
+            codex: vec![],
+            opencode_db: vec![],
+        },
+        Box::new(FakeProbe(calls.clone())),
+    );
+    let sessions = scanner.tick(now_ms()).sessions;
+    assert_eq!(sessions.len(), 1);
+    assert_eq!(sessions[0].id, "same");
+    let seen = calls.lock().unwrap().clone();
+    assert!(seen.contains(&(4243, Some("999".to_owned()))));
+    fs::remove_dir_all(home).unwrap();
+}
+
 #[test]
 fn wsl_probe_times_out() {
     let start = Instant::now();
