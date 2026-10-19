@@ -58,6 +58,17 @@ fn opencode_reads_only_session_v2() {
     conn.execute_batch("CREATE TABLE credential(id TEXT, directory TEXT, model TEXT, cost REAL, tokens_input INTEGER, tokens_output INTEGER, tokens_reasoning INTEGER, tokens_cache_read INTEGER, tokens_cache_write INTEGER, time_updated INTEGER, time_idle INTEGER, time_archived INTEGER); CREATE VIEW session_v2 AS SELECT * FROM credential;").unwrap();
     drop(conn);
     assert!(opencode::read_opencode(&path).is_err());
+    std::fs::remove_file(&path).unwrap();
+
+    // Other OpenCode versions keep sessions in `session`, without `time_idle` (issue #1).
+    let conn = rusqlite::Connection::open(&path).unwrap();
+    conn.execute_batch("CREATE TABLE session(id TEXT, directory TEXT, model TEXT, cost REAL, tokens_input INTEGER, tokens_output INTEGER, tokens_reasoning INTEGER, tokens_cache_read INTEGER, tokens_cache_write INTEGER, time_updated INTEGER, time_archived INTEGER); CREATE TABLE credential(secret TEXT); INSERT INTO session VALUES('b','/safe','{\"id\":\"deepseek-flash\",\"providerID\":\"deepseek\"}',0.5,4,1,0,0,0,1792320000000,NULL);").unwrap();
+    drop(conn);
+    let (sessions, _) = opencode::read_opencode(&path).unwrap();
+    assert_eq!(sessions[0].id, "b");
+    assert_eq!(sessions[0].model.as_deref(), Some("deepseek-flash"));
+    assert_eq!(sessions[0].tokens, 5);
+    assert_eq!(sessions[0].idle_ms, None);
     std::fs::remove_file(path).unwrap();
 }
 

@@ -8,6 +8,7 @@ mod overlay;
 mod pipe;
 mod statusline;
 mod tray;
+mod update;
 mod wrap;
 
 use status_island::{config, connectors, ntfy};
@@ -140,6 +141,31 @@ fn finish_onboarding(app: tauri::AppHandle) -> Result<(), String> {
     Ok(())
 }
 
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+struct UpdateStatus {
+    current: String,
+    available: Option<String>,
+}
+
+#[tauri::command]
+fn update_status(app: tauri::AppHandle) -> UpdateStatus {
+    UpdateStatus {
+        current: app.package_info().version.to_string(),
+        available: update::available(&app),
+    }
+}
+
+#[tauri::command]
+async fn check_update(app: tauri::AppHandle) -> Result<Option<String>, String> {
+    update::check(&app).await
+}
+
+#[tauri::command]
+async fn install_update(app: tauri::AppHandle) -> Result<(), String> {
+    update::install(&app).await
+}
+
 fn connector_manifest() -> Option<std::path::PathBuf> {
     Some(
         std::path::PathBuf::from(std::env::var_os("LOCALAPPDATA")?)
@@ -174,7 +200,9 @@ fn run_app() {
     let overlay_state = overlay::OverlayState::default();
     let overlay_thread_state = overlay_state.clone();
     tauri::Builder::default()
+        .plugin(tauri_plugin_updater::Builder::new().build())
         .manage(state)
+        .manage(update::UpdateState::default())
         .manage(overlay_state)
         .invoke_handler(tauri::generate_handler![
             get_snapshot,
@@ -186,12 +214,16 @@ fn run_app() {
             disable_claude,
             pairing,
             send_test_push,
-            finish_onboarding
+            finish_onboarding,
+            update_status,
+            check_update,
+            install_update
         ])
         .setup(move |app| {
             engine::start(app.handle().clone(), thread_state.clone());
             overlay::start(app.handle().clone(), overlay_thread_state.clone());
             tray::create(app.handle())?;
+            update::start(app.handle().clone());
             if !config::load().onboarded {
                 tray::show_window(app.handle(), "connect");
             }

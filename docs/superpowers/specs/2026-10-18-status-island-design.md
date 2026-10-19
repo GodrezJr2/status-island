@@ -84,6 +84,7 @@ All sources below were verified on the owner's PC unless marked otherwise.
 
 - **`~/.local/share/opencode/opencode.db`**, opened read-only with the WAL intact.
   - `session_v2` holds `model`, `directory`, `cost`, `tokens_*`, `time_updated`, `time_idle`.
+  - Some OpenCode versions use a `session` table instead, with the same columns but no `time_idle` (issue #1). The reader uses whichever exists.
   - `session_message` holds per-message tokens and cost.
   - The context limit comes from the `kv['models-dev:catalog']` model catalogue.
   - Never read the `account`, `control_account` or `credential` tables.

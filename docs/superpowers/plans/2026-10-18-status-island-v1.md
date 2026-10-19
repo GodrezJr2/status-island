@@ -478,7 +478,7 @@
   - SmartScreen "More info → Run anyway".
   - How to undo.
   - Microsoft Defender false-positive submission link.
-- The Tauri updater stays off until signing exists.
+- The Tauri updater signs updates with its own free key (separate from code signing). It shipped in 0.1.2 (owner-approved 2026-10-19).
 
 - [ ] **Step 1: Write `release.yml`**, push a tag to a test branch, and confirm both installers build. Expected: two `.exe` assets.
 - [ ] **Step 2: Install on the owner's PC with no admin prompt.** Measure idle CPU and RAM with all WebView2 processes summed (target < 1% and ~150 MB) and record the figures in the README.

@@ -9,8 +9,8 @@ Works with **Claude Code, Codex and OpenCode** on **Windows 10 and 11** (x64 and
 ## Install
 
 **Download the installer:**
-- **Most PCs (Intel / AMD):** [Status.Island_0.1.1_x64-setup.exe](https://github.com/Hossain-13/status-island/releases/latest/download/Status.Island_0.1.1_x64-setup.exe)
-- **ARM laptops (Snapdragon, Surface Pro X):** [Status.Island_0.1.1_arm64-setup.exe](https://github.com/Hossain-13/status-island/releases/latest/download/Status.Island_0.1.1_arm64-setup.exe)
+- **Most PCs (Intel / AMD):** [StatusIsland-x64-setup.exe](https://github.com/Hossain-13/status-island/releases/latest/download/StatusIsland-x64-setup.exe)
+- **ARM laptops (Snapdragon, Surface Pro X):** [StatusIsland-arm64-setup.exe](https://github.com/Hossain-13/status-island/releases/latest/download/StatusIsland-arm64-setup.exe)
 
 All versions are on the [Releases page](https://github.com/Hossain-13/status-island/releases).
 
@@ -21,7 +21,9 @@ All versions are on the [Releases page](https://github.com/Hossain-13/status-isl
 4. **For live Claude limits,** switch on **Claude Code**, then reload VS Code once (`Ctrl+Shift+P` → **Developer: Reload Window**). Claude tabs that were already open before the switch can't report until that reload.
 5. **For phone alerts (optional),** install the free **ntfy** app (Android or iPhone), scan the QR code on the Connect screen, and tap **Send test**.
 
-Status Island lives in the system tray. Right-click it for Connect, Settings, Pause alerts and Quit.
+Status Island lives in the system tray. Right-click it for Connect, Settings, Check for updates, Pause alerts and Quit.
+
+**Updates:** from 0.1.2 on, Status Island checks GitHub for a new version every few hours. When one is ready, the tray menu shows **Install update** and one click installs it, with no admin rights, keeping your settings and connector. It only installs updates signed with this project's key. You can turn the check off in Settings. **On 0.1.1?** Download and run the installer above once; after that, updates come to you.
 
 If your antivirus flags the installer, please report a false positive to Microsoft: https://www.microsoft.com/en-us/wdsi/filesubmission
 

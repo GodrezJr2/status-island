@@ -48,6 +48,22 @@ fn config_roundtrip_and_defaults() {
 }
 
 #[test]
+fn update_check_on_by_default_and_for_old_configs() {
+    assert!(Config::default().check_updates);
+    let path = tmp("old");
+    // A 0.1.1 config has no checkUpdates field; it keeps the user's settings and turns checks on.
+    std::fs::write(
+        &path,
+        r#"{"monitor":"active","offsetX":20,"onboarded":true}"#,
+    )
+    .unwrap();
+    let cfg = load_from(&path);
+    assert!(cfg.check_updates);
+    assert_eq!(cfg.offset_x, 20);
+    assert!(cfg.onboarded);
+}
+
+#[test]
 fn quiet_hours_suppress_push() {
     let mut cfg = Config {
         ntfy: paired(),

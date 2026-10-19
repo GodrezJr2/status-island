@@ -32,6 +32,7 @@ export function Island() {
   const [blocked, setBlocked] = useState(false);
   const [alert, setAlert] = useState<Alert | null>(null);
   const [panelHeight, setPanelHeight] = useState(300);
+  const [update, setUpdate] = useState<string | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const openTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const closeTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -41,9 +42,11 @@ export function Island() {
 
   useEffect(() => {
     invoke<Snapshot>('get_snapshot').then(setSnapshot).catch(() => {});
+    invoke<{ available: string | null }>('update_status').then(s => setUpdate(s.available)).catch(() => {});
     const subscriptions = [
       listen<Snapshot>('snapshot', e => setSnapshot(e.payload)),
       listen<Pointer>('pointer', e => setPointer(e.payload)),
+      listen<string | null>('update', e => setUpdate(e.payload)),
       listen<Alert>('alert', e => {
         setAlert(e.payload);
         if (alertTimer.current) clearTimeout(alertTimer.current);
@@ -70,7 +73,7 @@ export function Island() {
 
   useLayoutEffect(() => {
     if (open && panelRef.current) setPanelHeight(Math.ceil(panelRef.current.scrollHeight));
-  }, [open, snapshot]);
+  }, [open, snapshot, update]);
 
   const size = islandSize(state, working.length, panelHeight);
   const opacity = state === 'alert' && pointer.inside ? 0.36 : size.opacity;
@@ -96,7 +99,7 @@ export function Island() {
   }, [alert, reduced, animateShell, shellRef]);
 
   let content: ReactNode;
-  if (open) content = <Dropdown ref={panelRef} snapshot={snapshot}/>;
+  if (open) content = <Dropdown ref={panelRef} snapshot={snapshot} update={update}/>;
   else if (showAlert) {
     const w = alertWindow(snapshot, alert!);
     content = <Row session={alertSession!} window={w} primary label={alertText(alert!.kind, w, alert!.window) || alert!.title}/>;

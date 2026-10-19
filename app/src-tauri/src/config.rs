@@ -24,6 +24,8 @@ pub struct Config {
     pub prefs: AlertPrefs,
     pub alerts_paused_until_ms: Option<i64>,
     pub onboarded: bool,
+    /// Look for a newer release on GitHub every few hours (one request, no account data).
+    pub check_updates: bool,
 }
 
 impl Default for Config {
@@ -36,6 +38,7 @@ impl Default for Config {
             prefs: AlertPrefs::default(),
             alerts_paused_until_ms: None,
             onboarded: false,
+            check_updates: true,
         }
     }
 }
