@@ -27,6 +27,8 @@ pub enum Level {
 #[serde(rename_all = "camelCase")]
 pub struct Alert {
     pub agent: AgentKind,
+    /// Which limit the alert is about, so the island shows the matching number.
+    pub window: WindowKind,
     pub kind: AlertKind,
     pub title: String,
     pub body: String,
@@ -153,6 +155,7 @@ impl AlertEngine {
             self.last_sent.insert((agent, kind), now_ms);
             alerts.push(Alert {
                 agent,
+                window,
                 kind,
                 title,
                 body,

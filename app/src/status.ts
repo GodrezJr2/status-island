@@ -17,14 +17,18 @@ export function clock(ms: number | null): string {
   return new Date(ms).toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
 }
 
-/** Text shown on the island while an alert is active (spec §6.2 alert row). */
-export function alertText(kind: AlertKind, w: WindowView | null): string {
+export type LimitWindow = 'fiveHour' | 'weekly';
+
+/** Text shown on the island while an alert is active (spec §6.2 alert row). Weekly alerts say
+ *  so, because the row's number and ring then show the weekly limit, not the 5-hour one. */
+export function alertText(kind: AlertKind, w: WindowView | null, window: LimitWindow = 'fiveHour'): string {
+  const weekly = window === 'weekly' ? 'Weekly · ' : '';
   switch (kind) {
-    case 'fastDrain': return `Draining fast · ${(w?.burnPtsPerMin ?? 0).toFixed(1)}%/min`;
-    case 'limitReached': return `Limit reached · resets ${clock(w?.resetsAtMs ?? null)}`;
-    case 'left50': return '50% left';
-    case 'left20': return '20% left';
-    case 'left10': return '10% left';
+    case 'fastDrain': return `${weekly}Draining fast · ${(w?.burnPtsPerMin ?? 0).toFixed(1)}%/min`;
+    case 'limitReached': return `${window === 'weekly' ? 'Weekly limit' : 'Limit'} reached · resets ${clock(w?.resetsAtMs ?? null)}`;
+    case 'left50': return `${weekly}50% left`;
+    case 'left20': return `${weekly}20% left`;
+    case 'left10': return `${weekly}10% left`;
     default: return '';
   }
 }

@@ -119,6 +119,7 @@ fn send_test_push() -> Result<(), String> {
     }
     let alert = si_core::alerts::Alert {
         agent: si_core::model::AgentKind::Claude,
+        window: si_core::model::WindowKind::FiveHour,
         kind: si_core::alerts::AlertKind::TaskFinished,
         title: "Status Island · test".into(),
         body: "Phone alerts are working.".into(),

@@ -8,12 +8,18 @@ import { Ring } from './Ring';
 import { Dropdown } from './Dropdown';
 import { islandSize, type IslandState } from './layout';
 import { springs } from './motion';
-import { alertText, levelOf, tightestLeft, type AlertKind, type Level } from './status';
+import { alertText, levelOf, tightestLeft, type AlertKind, type Level, type LimitWindow } from './status';
 import { colors, levelColor } from './tokens';
 import { emptySnapshot, windowFor, type Kind, type Snapshot } from './types';
 
 type Pointer = { inside: boolean; down: boolean };
-type Alert = { agent: Kind; kind: AlertKind; title: string; body: string; level: 'warn' | 'crit' | 'info' };
+type Alert = { agent: Kind; window: LimitWindow; kind: AlertKind; title: string; body: string; level: 'warn' | 'crit' | 'info' };
+
+/** The limit window an alert is about, so the row shows the matching number and ring. */
+function alertWindow(snapshot: Snapshot, alert: Alert) {
+  const account = alert.agent === 'claude' ? snapshot.claude : alert.agent === 'codex' ? snapshot.codex : null;
+  return account ? (alert.window === 'weekly' ? account.weekly : account.fiveHour) : null;
+}
 
 const enter = { opacity: 0, scale: 0.9, y: -6, filter: 'blur(5px)' };
 const shown = { opacity: 1, scale: 1, y: 0, filter: 'blur(0px)' };
@@ -76,7 +82,8 @@ export function Island() {
     const levels = working.map(s => levelOf(windowFor(snapshot, s.kind)));
     return levels.includes('crit') ? 'crit' : levels.includes('warn') ? 'warn' : 'ok';
   }, [working, snapshot]);
-  const glowLevel: Level = showAlert ? (alert!.level === 'crit' ? 'crit' : 'warn') : worst;
+  // Informational alerts (50% left) don't glow; amber/red are for warning and critical only.
+  const glowLevel: Level = showAlert && alert!.level !== 'info' ? (alert!.level === 'crit' ? 'crit' : 'warn') : worst;
   const glow = glowLevel === 'crit' || glowLevel === 'warn' ? levelColor[glowLevel] : null;
 
   const grow = state === 'idle' ? springs.shrink : open ? springs.hoverOpen : state === 'alert' ? springs.alertIn : working.length > 1 ? springs.row : springs.grow;
@@ -90,7 +97,10 @@ export function Island() {
 
   let content: ReactNode;
   if (open) content = <Dropdown ref={panelRef} snapshot={snapshot}/>;
-  else if (showAlert) content = <Row session={alertSession!} window={windowFor(snapshot, alertSession!.kind)} primary label={alertText(alert!.kind, windowFor(snapshot, alertSession!.kind)) || alert!.title}/>;
+  else if (showAlert) {
+    const w = alertWindow(snapshot, alert!);
+    content = <Row session={alertSession!} window={w} primary label={alertText(alert!.kind, w, alert!.window) || alert!.title}/>;
+  }
   else if (state === 'idle') content = <div className="idle-row">
     <span className="idle-dot"/>
     {tight && <span className="idle-limit"><NumberFlow value={Math.round(tight.leftPct)} suffix="%" respectMotionPreference/><Ring left={tight.leftPct} color={colors.stale} freshness={tight.freshness} size={14}/></span>}

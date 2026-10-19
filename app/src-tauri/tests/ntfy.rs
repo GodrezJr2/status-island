@@ -1,6 +1,6 @@
 use si_core::{
     alerts::{Alert, AlertKind, Level},
-    model::AgentKind,
+    model::{AgentKind, WindowKind},
 };
 use status_island::ntfy::{self, DailyCounter, NtfyConfig, NtfyError};
 use std::{
@@ -13,6 +13,7 @@ use std::{
 fn alert() -> Alert {
     Alert {
         agent: AgentKind::Claude,
+        window: WindowKind::FiveHour,
         kind: AlertKind::Left20,
         title: "Claude Code · 20% left".into(),
         body: "5-hour limit · resets 3:40 PM · review model usage".into(),

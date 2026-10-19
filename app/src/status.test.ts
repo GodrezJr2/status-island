@@ -27,6 +27,11 @@ describe('alertText', () => {
     expect(alertText('left10', win(10))).toBe('10% left');
     expect(alertText('limitReached', win(0))).toMatch(/^Limit reached · resets \d{1,2}:\d{2} (AM|PM)$/);
   });
+  it('names the weekly window so it is never confused with the 5-hour number', () => {
+    expect(alertText('left50', win(48), 'weekly')).toBe('Weekly · 50% left');
+    expect(alertText('limitReached', win(0), 'weekly')).toMatch(/^Weekly limit reached · resets /);
+    expect(alertText('left50', win(48), 'fiveHour')).toBe('50% left');
+  });
 });
 
 describe('tightestLeft', () => {
