@@ -1,14 +1,14 @@
 # yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.12.0.schema.json
 PackageIdentifier: Hossain-13.StatusIsland
-PackageVersion: 0.1.0
+PackageVersion: 0.1.1
 InstallerType: nullsoft
 Scope: user
 Installers:
   - Architecture: x64
-    InstallerUrl: https://github.com/Hossain-13/status-island/releases/download/v0.1.0-preview/Status.Island_0.1.0_x64-setup.exe
-    InstallerSha256: AB73CA9C9880DF5AAAEBECBC907FA8D4B6F9B16ED49DA7D79296DF88AC7E2AA6
+    InstallerUrl: https://github.com/Hossain-13/status-island/releases/download/v0.1.1-preview/Status.Island_0.1.1_x64-setup.exe
+    InstallerSha256: D1B6375F81921EEEA0C1E59E1110D03E7FE5E1F08AF8AF1CF9B7A0BB449E8771
   - Architecture: arm64
-    InstallerUrl: https://github.com/Hossain-13/status-island/releases/download/v0.1.0-preview/Status.Island_0.1.0_arm64-setup.exe
-    InstallerSha256: DF4DB6E80B9B14E5D53609EC1DA99CFD123445D86602DE8CD26CB8434BCA53D8
+    InstallerUrl: https://github.com/Hossain-13/status-island/releases/download/v0.1.1-preview/Status.Island_0.1.1_arm64-setup.exe
+    InstallerSha256: BBEBEA55F79DAAA8C58F4BD0F1D79431BCCF7FB63AB56BE3186361DADB8FA23D
 ManifestType: installer
 ManifestVersion: 1.12.0
