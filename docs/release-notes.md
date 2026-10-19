@@ -29,11 +29,10 @@ You can check an installer with [VirusTotal](https://www.virustotal.com/gui/home
 - Live Claude 5-hour and weekly limits through the VS Code connector. Codex and OpenCode are detected automatically.
 - Uninstall removes the app and its data.
 - Turning the Claude connector off restores both settings files byte-for-byte (VS Code and Claude, checked against the backups).
+- Phone alerts through ntfy (QR pairing and test push), fullscreen hiding and display changes.
 - Resource use while an agent was working: about 0.5% of total CPU (12 cores) and about 180 MB private memory, including WebView2.
 
 ### Still to verify
-- Phone push: scan the QR code with ntfy and use **Send test**.
-- Fullscreen hiding, monitor unplug, DPI changes and a top taskbar.
 - Install on an ARM64 laptop.
 
 ### Known preview limits
