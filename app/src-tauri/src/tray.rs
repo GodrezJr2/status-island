@@ -3,7 +3,8 @@
 use tauri::{
     menu::{Menu, MenuItem},
     tray::TrayIconBuilder,
-    AppHandle, Emitter, Manager,
+    window::Color,
+    AppHandle, Emitter, Manager, Theme, WebviewUrl, WebviewWindowBuilder,
 };
 
 pub fn create(app: &AppHandle) -> tauri::Result<()> {
@@ -33,14 +34,30 @@ pub fn create(app: &AppHandle) -> tauri::Result<()> {
     Ok(())
 }
 
-/// Shows the settings window on the given view ("connect" or "settings").
+/// Shows the settings window on the given view ("connect" or "settings"). The window is created
+/// on demand and destroyed when closed, so no second renderer sits in memory all day.
 pub fn show_window(app: &AppHandle, view: &str) {
     if let Some(window) = app.get_webview_window("connect") {
         let _ = app.emit_to("connect", "view", view);
-        let _ = window.show();
         let _ = window.unminimize();
+        let _ = window.show();
         let _ = window.set_focus();
+        return;
     }
+    let view = if view == "settings" {
+        "settings"
+    } else {
+        "connect"
+    };
+    let _ = WebviewWindowBuilder::new(app, "connect", WebviewUrl::App("index.html".into()))
+        .initialization_script(format!("window.__SI_VIEW = '{view}';"))
+        .title("Status Island")
+        .inner_size(460.0, 660.0)
+        .resizable(false)
+        .center()
+        .theme(Some(Theme::Dark))
+        .background_color(Color(22, 22, 24, 255))
+        .build();
 }
 
 fn now_ms() -> i64 {

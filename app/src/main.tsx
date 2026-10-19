@@ -14,7 +14,8 @@ function windowLabel(): string {
 
 /** The "connect" window hosts both the Connect and Settings views; the tray picks which one. */
 function SettingsWindow() {
-  const [view, setView] = useState<'connect' | 'settings'>('connect');
+  const initial = (window as { __SI_VIEW?: string }).__SI_VIEW === 'settings' ? 'settings' : 'connect';
+  const [view, setView] = useState<'connect' | 'settings'>(initial);
   useEffect(() => {
     const off = listen<string>('view', e => setView(e.payload === 'settings' ? 'settings' : 'connect'));
     return () => { off.then(f => f()); };

@@ -130,7 +130,7 @@ fn finish_onboarding(app: tauri::AppHandle) -> Result<(), String> {
     cfg.onboarded = true;
     config::save(&cfg)?;
     if let Some(w) = tauri::Manager::get_webview_window(&app, "connect") {
-        let _ = w.hide();
+        let _ = w.close();
     }
     Ok(())
 }
@@ -187,16 +187,6 @@ fn run_app() {
             engine::start(app.handle().clone(), thread_state.clone());
             overlay::start(app.handle().clone(), overlay_thread_state.clone());
             tray::create(app.handle())?;
-            if let Some(connect) = tauri::Manager::get_webview_window(app, "connect") {
-                // Closing the settings window only hides it; the island keeps running.
-                let hide = connect.clone();
-                connect.on_window_event(move |event| {
-                    if let tauri::WindowEvent::CloseRequested { api, .. } = event {
-                        api.prevent_close();
-                        let _ = hide.hide();
-                    }
-                });
-            }
             if !config::load().onboarded {
                 tray::show_window(app.handle(), "connect");
             }

@@ -12,8 +12,7 @@
   },
   "app": {
     "windows": [
-      { "label": "main", "title": "Status Island", "width": 460, "height": 520, "visible": false, "transparent": true, "decorations": false, "alwaysOnTop": true, "skipTaskbar": true, "focusable": false, "shadow": false },
-      { "label": "connect", "title": "Status Island", "width": 460, "height": 660, "visible": false, "resizable": false, "center": true, "theme": "Dark", "backgroundColor": "#161618" }
+      { "label": "main", "title": "Status Island", "width": 460, "height": 520, "visible": false, "transparent": true, "decorations": false, "alwaysOnTop": true, "skipTaskbar": true, "focusable": false, "shadow": false }
     ]
   },
   "bundle": {
