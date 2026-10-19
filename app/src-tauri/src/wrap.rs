@@ -12,7 +12,7 @@ use windows::Win32::{
         JobObjects::{
             AssignProcessToJobObject, CreateJobObjectW, JobObjectExtendedLimitInformation,
             SetInformationJobObject, JOBOBJECT_EXTENDED_LIMIT_INFORMATION,
-            JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE,
+            JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE, JOB_OBJECT_LIMIT_SILENT_BREAKAWAY_OK,
         },
     },
 };
@@ -166,7 +166,10 @@ impl Job {
         unsafe {
             let handle = CreateJobObjectW(None, None).ok()?;
             let mut info = JOBOBJECT_EXTENDED_LIMIT_INFORMATION::default();
-            info.BasicLimitInformation.LimitFlags = JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE;
+            // Kill Claude if the wrapper dies, but let processes Claude starts break away from
+            // the job, so they outlive the session exactly as they do without the wrapper.
+            info.BasicLimitInformation.LimitFlags =
+                JOB_OBJECT_LIMIT_KILL_ON_JOB_CLOSE | JOB_OBJECT_LIMIT_SILENT_BREAKAWAY_OK;
             let set = SetInformationJobObject(
                 handle,
                 JobObjectExtendedLimitInformation,

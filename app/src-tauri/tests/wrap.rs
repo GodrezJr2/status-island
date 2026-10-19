@@ -173,3 +173,73 @@ fn wrap_kill_ends_child() {
     fs::remove_file(p).unwrap();
     fs::remove_file(pid_file).unwrap();
 }
+
+fn alive(pid: &str) -> bool {
+    let output = Command::new("tasklist")
+        .args(["/FI", &format!("PID eq {pid}"), "/FO", "CSV", "/NH"])
+        .output()
+        .unwrap();
+    String::from_utf8_lossy(&output.stdout).lines().any(|line| {
+        line.split(',')
+            .nth(1)
+            .is_some_and(|n| n.trim_matches('"') == pid)
+    })
+}
+
+/// Processes Claude starts (dev servers, background builds, the island itself) must outlive
+/// the wrapper exactly as they outlive an unwrapped Claude. Only Claude is tied to the wrapper.
+#[test]
+fn wrap_kill_spares_grandchildren() {
+    let _guard = LOCK.lock().unwrap();
+    let dir = std::env::temp_dir();
+    let child_pid = dir.join(format!("si-gc-child-{}", std::process::id()));
+    let grand_pid = dir.join(format!("si-gc-grand-{}", std::process::id()));
+    let _ = fs::remove_file(&child_pid);
+    let _ = fs::remove_file(&grand_pid);
+    let p = script(
+        "const cp=require('child_process'),fs=require('fs');\
+         const g=cp.spawn(process.execPath,['-e','require(\"fs\").writeFileSync(process.argv[1],String(process.pid));setInterval(()=>{},1000)',process.argv[3]],{detached:true,stdio:'ignore'});\
+         g.unref();fs.writeFileSync(process.argv[2],String(process.pid));setInterval(()=>{},1000)",
+    );
+    let mut wrapper = Command::new(bin())
+        .arg("--wrap")
+        .arg(node())
+        .arg(&p)
+        .arg(&child_pid)
+        .arg(&grand_pid)
+        .stdin(Stdio::null())
+        .stdout(Stdio::null())
+        .stderr(Stdio::null())
+        .spawn()
+        .unwrap();
+    for _ in 0..200 {
+        if child_pid.exists() && grand_pid.exists() {
+            break;
+        }
+        std::thread::sleep(Duration::from_millis(20));
+    }
+    let child = fs::read_to_string(&child_pid).unwrap();
+    let grand = fs::read_to_string(&grand_pid).unwrap();
+    wrapper.kill().unwrap();
+    wrapper.wait().unwrap();
+    std::thread::sleep(Duration::from_millis(500));
+    let child_alive = alive(&child);
+    let grand_alive = alive(&grand);
+    let _ = Command::new("taskkill")
+        .args(["/PID", &grand, "/F"])
+        .output();
+    let _ = Command::new("taskkill")
+        .args(["/PID", &child, "/F"])
+        .output();
+    assert!(
+        !child_alive,
+        "Claude (the direct child) must end with the wrapper"
+    );
+    assert!(
+        grand_alive,
+        "a process Claude started must not be killed by the wrapper"
+    );
+    let _ = fs::remove_file(p);
+    let _ = fs::remove_file(child_pid);
+    let _ = fs::remove_file(grand_pid);
+}
