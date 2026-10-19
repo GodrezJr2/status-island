@@ -6,7 +6,7 @@ Status Island is a Dynamic-Island-style overlay for Windows. It shows which AI c
 - **No admin rights.** Per-user install, and every change it makes can be undone.
 
 ### Install
-1. Download `Status.Island_0.1.0_x64-setup.exe`. On a Snapdragon or other ARM laptop, use `Status.Island_0.1.0_arm64-setup.exe`.
+1. Download `Status.Island_0.1.1_x64-setup.exe`. On a Snapdragon or other ARM laptop, use `Status.Island_0.1.1_arm64-setup.exe`.
 2. Run it. These builds aren't code-signed yet, so Windows SmartScreen may say "Windows protected your PC". Click **More info → Run anyway**. The source and the build log for this release are public on GitHub.
 3. On first launch, the Connect screen opens. Switch on Claude Code for live limits, and scan the QR code with the free ntfy app if you want phone alerts.
 
@@ -18,14 +18,23 @@ If your antivirus flags the installer, please report it as a false positive to M
 
 You can check an installer with [VirusTotal](https://www.virustotal.com/gui/home/upload). No VirusTotal scan result is claimed for these builds.
 
-### Not yet verified by a human
-- Install the x64 or ARM64 preview on the owner's PC without an admin prompt; confirm first launch shows Connect.
-- Turn on the Claude connector and inspect the actual VS Code and Claude settings, then turn it off and confirm both files restore byte-for-byte. This automated run did not touch those settings.
-- Start real Claude Code, Codex and OpenCode sessions and confirm live limits, state, and the Connect screen self-checks.
-- Scan the QR code in the owner's ntfy app and send a test push. No real push was sent in this run.
-- Check click-through, hover opacity, fullscreen hiding, monitor unplug/DPI changes, all island visual states, and the Figma comparison on the owner's screen.
-- Measure idle CPU and summed Status Island plus WebView2 memory on the owner's PC. No representative idle performance measurement is available yet.
-- Uninstall and verify both settings files restore and `%LOCALAPPDATA%\StatusIsland` is removed.
+### What's new in 0.1.1
+- No console window: the island, the VS Code wrapper and the status line add-on all run without one.
+- Processes Claude starts (dev servers, builds) are no longer ended when a wrapped Claude session closes.
+- The OpenCode card shows the model name properly ("DeepSeek Flash · OpenCode"), and its details aren't cut off.
+- Weekly alerts say "Weekly · 50% left" and show the weekly number. Informational alerts no longer glow amber.
+
+### Verified on the owner's PC (Windows 11, x64)
+- Per-user install and upgrade with no admin prompt; the first launch opens Connect.
+- Live Claude 5-hour and weekly limits through the VS Code connector. Codex and OpenCode are detected automatically.
+- Uninstall removes the app and its data.
+- Resource use while an agent was working: about 0.5% of total CPU (12 cores) and about 180 MB private memory, including WebView2.
+
+### Still to verify
+- Turn the Claude connector off and compare both settings files byte-for-byte with the backups.
+- Phone push: scan the QR code with ntfy and use **Send test**.
+- Fullscreen hiding, monitor unplug, DPI changes and a top taskbar.
+- Install on an ARM64 laptop.
 
 ### Known preview limits
 - The Claude Connect-screen self-check does not yet independently verify the VS Code wrapper's parent process or distinguish every failure reason.
