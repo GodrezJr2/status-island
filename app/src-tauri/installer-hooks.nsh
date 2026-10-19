@@ -8,6 +8,8 @@
 
 !macro NSIS_HOOK_PREUNINSTALL
   ; Put back every settings file Status Island changed, then remove its data folder.
-  ExecWait '"$INSTDIR\status-island.exe" --uninstall-cleanup'
+  ExecWait '"$INSTDIR\status-island.exe" --uninstall-cleanup' $0
+  IntCmp $0 0 +2
+    Abort "Status Island could not restore your settings. Uninstall stopped so the backup remains available."
   Delete "$INSTDIR\si-wrap.exe"
 !macroend

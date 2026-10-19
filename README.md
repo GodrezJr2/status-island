@@ -12,6 +12,15 @@ Supports Claude Code, Codex and OpenCode on Windows 10 and 11 (x64 and ARM64).
 - **No fake numbers.** Every figure is exact, or clearly labelled as an estimate with its age.
 - **No admin rights.** Per-user install, and every change it makes can be undone.
 
+## Safety rules
+
+1. **Never read credentials.** No `.credentials.json`, OAuth tokens, `*.key` files, IDE lock files, browser cookies or keychains.
+2. **Never make requests with the user's account.** No calls to Anthropic, OpenAI or claude.ai endpoints. No hidden agent sessions. Never spend the user's tokens to read their usage.
+3. **No interception of network traffic** (no proxies or relays).
+4. **Only official, documented mechanisms:** the Claude Code status line, the Claude VS Code extension's `claudeProcessWrapper` setting, and local files the agents write themselves.
+5. **Local only.** The only outbound traffic is phone push (ntfy) and an optional update check. Push messages carry the agent name, %, project name and times. Never prompts or code.
+6. **Every change can be undone, and uninstall undoes it automatically.**
+
 ## Download
 
 Get the installer from [Releases](https://github.com/Hossain-13/status-island/releases): `…_x64-setup.exe`, or `…_arm64-setup.exe` for ARM laptops.

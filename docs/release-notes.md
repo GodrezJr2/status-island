@@ -15,3 +15,14 @@ Status Island is a Dynamic-Island-style overlay for Windows. It shows which AI c
 - Uninstalling (Windows Settings → Apps) does the same, then removes the app's data.
 
 If your antivirus flags the installer, please report it as a false positive to Microsoft: https://www.microsoft.com/en-us/wdsi/filesubmission
+
+You can check an installer with [VirusTotal](https://www.virustotal.com/gui/home/upload). No VirusTotal scan result is claimed for these builds.
+
+### Not yet verified by a human
+- Install the x64 or ARM64 preview on the owner's PC without an admin prompt; confirm first launch shows Connect.
+- Turn on the Claude connector and inspect the actual VS Code and Claude settings, then turn it off and confirm both files restore byte-for-byte. This automated run did not touch those settings.
+- Start real Claude Code, Codex and OpenCode sessions and confirm live limits, state, and the Connect screen self-checks.
+- Scan the QR code in the owner's ntfy app and send a test push. No real push was sent in this run.
+- Check click-through, hover opacity, fullscreen hiding, monitor unplug/DPI changes, all island visual states, and the Figma comparison on the owner's screen.
+- Measure idle CPU and summed Status Island plus WebView2 memory on the owner's PC. No representative idle performance measurement is available yet.
+- Uninstall and verify both settings files restore and `%LOCALAPPDATA%\StatusIsland` is removed.
