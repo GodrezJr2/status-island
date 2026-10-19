@@ -6,7 +6,7 @@ Status Island is a Dynamic-Island-style overlay for Windows. It shows which AI c
 - **No admin rights.** Per-user install, and every change it makes can be undone.
 
 ### Install
-1. Download `Status Island_<version>_x64-setup.exe`. On a Snapdragon or other ARM laptop, use `…_arm64-setup.exe`.
+1. Download `Status.Island_0.1.0_x64-setup.exe`. On a Snapdragon or other ARM laptop, use `Status.Island_0.1.0_arm64-setup.exe`.
 2. Run it. These builds aren't code-signed yet, so Windows SmartScreen may say "Windows protected your PC". Click **More info → Run anyway**. The source and the build log for this release are public on GitHub.
 3. On first launch, the Connect screen opens. Switch on Claude Code for live limits, and scan the QR code with the free ntfy app if you want phone alerts.
 
@@ -26,3 +26,7 @@ You can check an installer with [VirusTotal](https://www.virustotal.com/gui/home
 - Check click-through, hover opacity, fullscreen hiding, monitor unplug/DPI changes, all island visual states, and the Figma comparison on the owner's screen.
 - Measure idle CPU and summed Status Island plus WebView2 memory on the owner's PC. No representative idle performance measurement is available yet.
 - Uninstall and verify both settings files restore and `%LOCALAPPDATA%\StatusIsland` is removed.
+
+### Known preview limits
+- The Claude Connect-screen self-check does not yet independently verify the VS Code wrapper's parent process or distinguish every failure reason.
+- A dedicated Windows suspend notification is not wired; resume behavior needs an owner-PC check.

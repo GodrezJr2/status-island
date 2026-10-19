@@ -1,0 +1,10 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.12.0.schema.json
+PackageIdentifier: Hossain-13.StatusIsland
+PackageVersion: 0.1.0
+PackageLocale: en-US
+Publisher: Sheikh Mohammad Hossain
+PackageName: Status Island
+License: MIT
+ShortDescription: Live AI agent limits, burn rate and context in a Windows overlay.
+ManifestType: defaultLocale
+ManifestVersion: 1.12.0

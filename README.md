@@ -23,7 +23,7 @@ Supports Claude Code, Codex and OpenCode on Windows 10 and 11 (x64 and ARM64).
 
 ## Download
 
-Get the installer from [Releases](https://github.com/Hossain-13/status-island/releases): `…_x64-setup.exe`, or `…_arm64-setup.exe` for ARM laptops.
+Get the installer from the [v0.1.0 preview release](https://github.com/Hossain-13/status-island/releases/tag/v0.1.0-preview): `Status.Island_0.1.0_x64-setup.exe`, or `Status.Island_0.1.0_arm64-setup.exe` for ARM laptops.
 
 The builds aren't code-signed yet, so Windows SmartScreen may say "Windows protected your PC". Click **More info → Run anyway**. Every release is built by the public [GitHub Actions workflow](.github/workflows/release.yml) from this source.
 
