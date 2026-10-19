@@ -68,3 +68,17 @@ fn parsers_ignore_unknown_shapes() {
     assert!(claude::parse_session_file(&v).is_none());
     assert!(codex::parse_rollout_line(&v).is_empty());
 }
+
+#[test]
+fn opencode_model_json_becomes_plain_id() {
+    use si_core::{model::model_label, opencode::model_id};
+    let raw = r#"{"id":"deepseek-flash","providerID":"deepseek"}"#;
+    assert_eq!(model_id(raw), "deepseek-flash");
+    assert_eq!(model_label(&model_id(raw)), "DeepSeek Flash");
+    assert_eq!(
+        model_id("deepseek-flash"),
+        "deepseek-flash",
+        "plain ids pass through"
+    );
+    assert_eq!(model_id("{not json"), "{not json");
+}

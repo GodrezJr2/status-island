@@ -30,7 +30,7 @@ export function AgentCard({ session, snapshot, now }: { session: SessionView; sn
     <div className="card-location">{location}</div>
     {five && <MetricLine label="5-hour" value={`${Math.round(five.leftPct)}% left`} detail={fmtReset(five.resetsAtMs, now)} fraction={five.leftPct / 100} color={levelColor[levelOf(five)]}/>}
     {week && <MetricLine label="Weekly" value={`${Math.round(week.leftPct)}% left`} detail={fmtReset(week.resetsAtMs, now)} fraction={week.leftPct / 100} color={levelColor[levelOf(week)]}/>}
-    {session.ctxTokens !== null && <MetricLine label="Context" value={session.ctxPct !== null ? `${session.ctxPct}% used` : fmtTokens(session.ctxTokens)} detail={`${fmtTokens(session.ctxTokens)} tokens`} fraction={session.ctxPct !== null ? session.ctxPct / 100 : null} color={colors.text}/>}
+    {session.ctxTokens !== null && <MetricLine label="Context" value={session.ctxPct !== null ? `${session.ctxPct}% used` : fmtTokens(session.ctxTokens)} detail={session.ctxPct !== null ? `${fmtTokens(session.ctxTokens)} tokens` : 'tokens in context'} fraction={session.ctxPct !== null ? session.ctxPct / 100 : null} color={colors.text}/>}
     {session.spend
       ? <>
           <MetricLine label="Spent" value={`$${session.spend.sessionUsd.toFixed(2)}`} detail={`this session · $${(snapshot.opencodeToday?.todayUsd ?? session.spend.todayUsd).toFixed(2)} today`} color={colors.openCode}/>

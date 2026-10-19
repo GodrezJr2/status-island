@@ -16,6 +16,15 @@ pub struct OcSession {
     pub idle_ms: Option<i64>,
 }
 
+/// OpenCode stores the model as JSON (`{"id":"deepseek-flash","providerID":"deepseek"}`);
+/// return its `id`. Anything else passes through unchanged.
+pub fn model_id(raw: &str) -> String {
+    serde_json::from_str::<serde_json::Value>(raw)
+        .ok()
+        .and_then(|v| v.get("id").and_then(|id| id.as_str()).map(str::to_owned))
+        .unwrap_or_else(|| raw.to_owned())
+}
+
 pub fn read_opencode(db: &Path) -> rusqlite::Result<(Vec<OcSession>, Spend)> {
     let conn = Connection::open_with_flags(
         db,
@@ -44,7 +53,7 @@ pub fn read_opencode(db: &Path) -> rusqlite::Result<(Vec<OcSession>, Spend)> {
             Ok(OcSession {
                 id: r.get(0)?,
                 directory: r.get(1)?,
-                model: r.get(2)?,
+                model: r.get::<_, Option<String>>(2)?.map(|m| model_id(&m)),
                 cost: r.get(3)?,
                 tokens: tokens.max(0) as u64,
                 updated_ms: r.get(5)?,
