@@ -1,5 +1,8 @@
 use crate::model::Spend;
-use rusqlite::{Connection, OpenFlags};
+use rusqlite::{
+    hooks::{AuthAction, Authorization},
+    Connection, OpenFlags,
+};
 use std::path::Path;
 
 #[derive(Clone, Debug, PartialEq)]
@@ -18,6 +21,22 @@ pub fn read_opencode(db: &Path) -> rusqlite::Result<(Vec<OcSession>, Spend)> {
         db,
         OpenFlags::SQLITE_OPEN_READ_ONLY | OpenFlags::SQLITE_OPEN_NO_MUTEX,
     )?;
+    conn.authorizer(Some(
+        |context: rusqlite::hooks::AuthContext<'_>| match context.action {
+            AuthAction::Select => Authorization::Allow,
+            AuthAction::Read {
+                table_name: "session_v2",
+                ..
+            } if context.database_name == Some("main") => Authorization::Allow,
+            AuthAction::Function { function_name }
+                if ["coalesce", "sum", "strftime"]
+                    .contains(&function_name.to_ascii_lowercase().as_str()) =>
+            {
+                Authorization::Allow
+            }
+            _ => Authorization::Deny,
+        },
+    ));
     let mut stmt = conn.prepare("SELECT id, directory, model, cost, tokens_input + tokens_output + tokens_reasoning + tokens_cache_read + tokens_cache_write, time_updated, time_idle FROM session_v2 WHERE time_archived IS NULL ORDER BY time_updated DESC LIMIT 5")?;
     let sessions = stmt
         .query_map([], |r| {

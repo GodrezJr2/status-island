@@ -41,12 +41,23 @@ fn codex_limits_from_token_count() {
 
 #[test]
 fn opencode_reads_only_session_v2() {
-    let path = std::env::temp_dir().join(format!("si-oc-test-{}.db", std::process::id()));
+    let dir =
+        std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../target/test-opencode");
+    std::fs::create_dir_all(&dir).unwrap();
+    let path = dir.join(format!("si-oc-test-{}.db", std::process::id()));
+    let _ = std::fs::remove_file(&path);
     let conn = rusqlite::Connection::open(&path).unwrap();
     conn.execute_batch("CREATE TABLE session_v2(id TEXT, directory TEXT, model TEXT, cost REAL, tokens_input INTEGER, tokens_output INTEGER, tokens_reasoning INTEGER, tokens_cache_read INTEGER, tokens_cache_write INTEGER, time_updated INTEGER, time_idle INTEGER, time_archived INTEGER); CREATE TABLE credential(secret TEXT); INSERT INTO credential VALUES('sentinel'); INSERT INTO session_v2 VALUES('a','/safe','m',1.5,10,2,0,3,0,1792320000000,NULL,NULL);").unwrap();
     drop(conn);
     let (sessions, _) = opencode::read_opencode(&path).unwrap();
     assert_eq!(sessions[0].id, "a");
+    std::fs::remove_file(&path).unwrap();
+
+    // A hostile schema cannot make our SELECT read a credential table through a view.
+    let conn = rusqlite::Connection::open(&path).unwrap();
+    conn.execute_batch("CREATE TABLE credential(id TEXT, directory TEXT, model TEXT, cost REAL, tokens_input INTEGER, tokens_output INTEGER, tokens_reasoning INTEGER, tokens_cache_read INTEGER, tokens_cache_write INTEGER, time_updated INTEGER, time_idle INTEGER, time_archived INTEGER); CREATE VIEW session_v2 AS SELECT * FROM credential;").unwrap();
+    drop(conn);
+    assert!(opencode::read_opencode(&path).is_err());
     std::fs::remove_file(path).unwrap();
 }
 
