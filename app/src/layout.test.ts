@@ -9,3 +9,9 @@ it('uses approved island sizes and opacities', () => {
   expect(islandSize('hover', 1)).toMatchObject({ opacity: 0.36 });
   expect(islandSize('dropdown', 1)).toMatchObject({ w: 400, opacity: 1 });
 });
+
+it('uses the Figma radii and alert size', () => {
+  expect(islandSize('compact', 1).radius).toBe(17);
+  expect(islandSize('stacked', 2).radius).toBe(22);
+  expect(islandSize('alert', 1)).toMatchObject({ w: 320, h: 34, radius: 17, opacity: 1 });
+});
