@@ -1,6 +1,12 @@
 use std::sync::atomic::{AtomicBool, Ordering};
 use windows::Win32::{
-    System::SystemInformation::GetTickCount,
+    System::{
+        RemoteDesktop::{
+            WTSFreeMemory, WTSQuerySessionInformationW, WTSSessionInfoEx, WTSINFOEXW,
+            WTS_CURRENT_SESSION, WTS_SESSIONSTATE_LOCK,
+        },
+        SystemInformation::GetTickCount,
+    },
     UI::Input::KeyboardAndMouse::{GetLastInputInfo, LASTINPUTINFO},
 };
 
@@ -15,7 +21,7 @@ pub fn set_suspending(value: bool) {
 }
 
 pub fn is_away() -> bool {
-    if LOCKED.load(Ordering::Relaxed) || SUSPENDING.load(Ordering::Relaxed) {
+    if LOCKED.load(Ordering::Relaxed) || SUSPENDING.load(Ordering::Relaxed) || session_locked() {
         return true;
     }
     let mut input = LASTINPUTINFO {
@@ -26,4 +32,32 @@ pub fn is_away() -> bool {
         return false;
     }
     unsafe { GetTickCount() }.wrapping_sub(input.dwTime) >= 120_000
+}
+
+fn session_locked() -> bool {
+    let mut buffer = windows::core::PWSTR::null();
+    let mut bytes = 0u32;
+    let result = unsafe {
+        WTSQuerySessionInformationW(
+            None,
+            WTS_CURRENT_SESSION,
+            WTSSessionInfoEx,
+            &mut buffer,
+            &mut bytes,
+        )
+    };
+    if result.is_err() || buffer.is_null() {
+        return false;
+    }
+    let locked = if bytes as usize >= std::mem::size_of::<WTSINFOEXW>() {
+        let info = unsafe { &*(buffer.0 as *const WTSINFOEXW) };
+        info.Level == 1
+            && unsafe { info.Data.WTSInfoExLevel1.SessionFlags } == WTS_SESSIONSTATE_LOCK as i32
+    } else {
+        false
+    };
+    unsafe {
+        WTSFreeMemory(buffer.0.cast());
+    }
+    locked
 }

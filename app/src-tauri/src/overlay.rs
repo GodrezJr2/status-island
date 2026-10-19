@@ -41,6 +41,7 @@ pub fn start(app: tauri::AppHandle, state: OverlayState) {
     let _ = window.set_always_on_top(true);
     let _ = window.set_skip_taskbar(true);
     let _ = window.set_focusable(false);
+    crate::fullscreen::start_foreground_hook();
     std::thread::spawn(move || {
         let mut last_pointer = Pointer {
             inside: false,
@@ -54,7 +55,14 @@ pub fn start(app: tauri::AppHandle, state: OverlayState) {
             .flatten()
             .map(|m| format!("{:?}", m.name()))
             .unwrap_or_default();
-        let mut last_fullscreen = false;
+        let mut last_fullscreen = window
+            .current_monitor()
+            .ok()
+            .flatten()
+            .is_some_and(|monitor| crate::fullscreen::fullscreen_active(&monitor));
+        if !last_fullscreen {
+            let _ = window.show();
+        }
         let mut ticks = 0u32;
         loop {
             let mut cursor = POINT::default();
@@ -96,6 +104,10 @@ pub fn start(app: tauri::AppHandle, state: OverlayState) {
                         reposition(&window, &cfg);
                         last_monitor = monitor_id;
                     }
+                }
+            }
+            if ticks.is_multiple_of(20) || crate::fullscreen::foreground_changed() {
+                if let Some(current) = window.current_monitor().ok().flatten() {
                     let fullscreen = crate::fullscreen::fullscreen_active(&current);
                     if fullscreen != last_fullscreen {
                         let _ = if fullscreen {
@@ -165,6 +177,5 @@ fn reposition(window: &tauri::WebviewWindow, cfg: &status_island::config::Config
     if let Some(target) = place(&info, choice, cfg.offset_x, taskbar).first() {
         let _ = window.set_size(PhysicalSize::new(target.w, target.h));
         let _ = window.set_position(PhysicalPosition::new(target.x, target.y));
-        let _ = window.show();
     }
 }
