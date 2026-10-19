@@ -2,7 +2,7 @@
 
 A Dynamic-Island-style overlay for Windows that shows, live, which AI coding agent is working, how much of its plan limit is left, how fast that limit is draining, and how full its context window is. When a limit drains fast while you're away from your desk, it sends a push to your phone.
 
-**Status:** design approved, v1 in development. Supports Claude Code, Codex and OpenCode.
+Supports Claude Code, Codex and OpenCode on Windows 10 and 11 (x64 and ARM64).
 
 ![Island states](docs/design/island-states.png)
 
@@ -11,6 +11,34 @@ A Dynamic-Island-style overlay for Windows that shows, live, which AI coding age
 - **Read-only.** It reads only files the agents write themselves. It never reads your login, never sends requests with your account, and never intercepts traffic.
 - **No fake numbers.** Every figure is exact, or clearly labelled as an estimate with its age.
 - **No admin rights.** Per-user install, and every change it makes can be undone.
+
+## Download
+
+Get the installer from [Releases](https://github.com/Hossain-13/status-island/releases): `…_x64-setup.exe`, or `…_arm64-setup.exe` for ARM laptops.
+
+The builds aren't code-signed yet, so Windows SmartScreen may say "Windows protected your PC". Click **More info → Run anyway**. Every release is built by the public [GitHub Actions workflow](.github/workflows/release.yml) from this source.
+
+If your antivirus flags it, please report a false positive to Microsoft: https://www.microsoft.com/en-us/wdsi/filesubmission
+
+## How it reads your agents
+
+| Agent | What it reads | What it changes |
+|---|---|---|
+| Codex | Its session files in `~/.codex/sessions` | Nothing |
+| OpenCode | Its session table in its local database (read-only) | Nothing |
+| Claude Code | Its session and transcript files in `~/.claude` | Only if you switch on the Claude connector (see below) |
+
+**The Claude connector** is optional, one switch on the Connect screen. It makes Claude's limits live in two ways:
+
+- **Terminal:** it sets Claude Code's documented `statusLine` to Status Island's small status line program. Your previous status line command is saved and still runs, so its output still shows.
+- **VS Code panel:** it sets the Claude extension's documented `claudeCode.claudeProcessWrapper` to `si-wrap.exe`. VS Code then starts Claude through it. The wrapper passes everything through unchanged, and copies **only** the limit messages Claude already sends to the panel. It never stores conversation content, never touches your login, and makes no network requests.
+
+Both settings files are backed up before the change.
+
+## Undo
+
+- Settings → Claude connector → **Turn off and restore my settings** puts both files back exactly as they were.
+- Uninstalling does the same automatically, then removes the app's data from `%LOCALAPPDATA%\StatusIsland`.
 
 ## Docs
 

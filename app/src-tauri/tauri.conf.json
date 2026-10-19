@@ -1,6 +1,7 @@
 {
   "$schema": "https://schema.tauri.app/config/2",
   "productName": "Status Island",
+  "mainBinaryName": "status-island",
   "version": "0.1.0",
   "identifier": "com.hossain13.statusisland",
   "build": {
@@ -10,7 +11,27 @@
     "frontendDist": "../dist"
   },
   "app": {
-    "windows": [{ "label": "main", "title": "Status Island", "width": 460, "height": 520, "visible": false, "transparent": true, "decorations": false, "alwaysOnTop": true, "skipTaskbar": true, "focusable": false, "shadow": false }]
+    "windows": [
+      { "label": "main", "title": "Status Island", "width": 460, "height": 520, "visible": false, "transparent": true, "decorations": false, "alwaysOnTop": true, "skipTaskbar": true, "focusable": false, "shadow": false },
+      { "label": "connect", "title": "Status Island", "width": 460, "height": 660, "visible": false, "resizable": false, "center": true, "theme": "Dark", "backgroundColor": "#161618" }
+    ]
   },
-  "bundle": { "active": false }
+  "bundle": {
+    "active": true,
+    "targets": ["nsis"],
+    "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.ico"],
+    "publisher": "Sheikh Mohammad Hossain",
+    "copyright": "© 2026 Sheikh Mohammad Hossain. MIT licence.",
+    "category": "DeveloperTool",
+    "shortDescription": "Live AI agent limits, burn rate and context in a Dynamic-Island overlay.",
+    "longDescription": "Status Island shows which AI coding agent is working, how much of its plan limit is left, how fast it is draining and how full its context is. Read-only: it never reads your login or sends requests with your account.",
+    "windows": {
+      "webviewInstallMode": { "type": "embedBootstrapper" },
+      "nsis": {
+        "installMode": "currentUser",
+        "installerHooks": "./installer-hooks.nsh",
+        "displayLanguageSelector": false
+      }
+    }
+  }
 }
