@@ -2,9 +2,35 @@
 
 A Dynamic-Island-style overlay for Windows that shows, live, which AI coding agent is working, how much of its plan limit is left, how fast that limit is draining, and how full its context window is. When a limit drains fast while you're away from your desk, it sends a push to your phone.
 
-Supports Claude Code, Codex and OpenCode on Windows 10 and 11 (x64 and ARM64).
+Works with **Claude Code, Codex and OpenCode** on **Windows 10 and 11** (x64 and ARM64).
 
 ![Island states](docs/design/island-states.png)
+
+## Install
+
+**Download the installer:**
+- **Most PCs (Intel / AMD):** [Status.Island_0.1.1_x64-setup.exe](https://github.com/Hossain-13/status-island/releases/latest/download/Status.Island_0.1.1_x64-setup.exe)
+- **ARM laptops (Snapdragon, Surface Pro X):** [Status.Island_0.1.1_arm64-setup.exe](https://github.com/Hossain-13/status-island/releases/latest/download/Status.Island_0.1.1_arm64-setup.exe)
+
+All versions are on the [Releases page](https://github.com/Hossain-13/status-island/releases).
+
+**Then:**
+1. **Run the installer.** It installs just for you, so no admin rights are needed.
+2. **If Windows says "Windows protected your PC"**, click **More info → Run anyway**. The app isn't code-signed yet; every installer is built in public by [this workflow](.github/workflows/release.yml) from this source.
+3. **The Connect screen opens on first launch.** Codex and OpenCode are picked up automatically.
+4. **For live Claude limits,** switch on **Claude Code**, then reload VS Code once (`Ctrl+Shift+P` → **Developer: Reload Window**). Claude tabs that were already open before the switch can't report until that reload.
+5. **For phone alerts (optional),** install the free **ntfy** app (Android or iPhone), scan the QR code on the Connect screen, and tap **Send test**.
+
+Status Island lives in the system tray. Right-click it for Connect, Settings, Pause alerts and Quit.
+
+If your antivirus flags the installer, please report a false positive to Microsoft: https://www.microsoft.com/en-us/wdsi/filesubmission
+
+## Using it
+
+- **At a glance:** the island sits top-centre and shows each working agent with how much of its limit is **left**.
+- **Hover:** the island turns see-through, so you can still see and click what's underneath.
+- **Keep hovering (about 1 second):** the dropdown opens with each agent's 5-hour and weekly limits, reset times, context used and burn rate.
+- **Alerts:** the island glows amber when a limit drops to 20% or less or is draining fast, and red at 10% or when the limit is reached. When you're away from your desk, the same alerts go to your phone.
 
 ## What it promises
 
@@ -21,14 +47,6 @@ Supports Claude Code, Codex and OpenCode on Windows 10 and 11 (x64 and ARM64).
 5. **Local only.** The only outbound traffic is phone push (ntfy) and an optional update check. Push messages carry the agent name, %, project name and times. Never prompts or code.
 6. **Every change can be undone, and uninstall undoes it automatically.**
 
-## Download
-
-Get the installer from the [v0.1.1 preview release](https://github.com/Hossain-13/status-island/releases/tag/v0.1.1-preview): `Status.Island_0.1.1_x64-setup.exe`, or `Status.Island_0.1.1_arm64-setup.exe` for ARM laptops.
-
-The builds aren't code-signed yet, so Windows SmartScreen may say "Windows protected your PC". Click **More info → Run anyway**. Every release is built by the public [GitHub Actions workflow](.github/workflows/release.yml) from this source.
-
-If your antivirus flags it, please report a false positive to Microsoft: https://www.microsoft.com/en-us/wdsi/filesubmission
-
 ## How it reads your agents
 
 | Agent | What it reads | What it changes |
@@ -37,7 +55,7 @@ If your antivirus flags it, please report a false positive to Microsoft: https:/
 | OpenCode | Its session table in its local database (read-only) | Nothing |
 | Claude Code | Its session and transcript files in `~/.claude` | Only if you switch on the Claude connector (see below) |
 
-**The Claude connector** is optional, one switch on the Connect screen. It makes Claude's limits live in two ways:
+**The Claude connector** is optional: one switch on the Connect screen. It makes Claude's limits live in two ways:
 
 - **Terminal:** it sets Claude Code's documented `statusLine` to Status Island's small status line program. Your previous status line command is saved and still runs, so its output still shows.
 - **VS Code panel:** it sets the Claude extension's documented `claudeCode.claudeProcessWrapper` to `si-wrap.exe`. VS Code then starts Claude through it. The wrapper passes everything through unchanged, and copies **only** the limit messages Claude already sends to the panel. It never stores conversation content, never touches your login, and makes no network requests.
@@ -47,7 +65,7 @@ Both settings files are backed up before the change.
 ## Undo
 
 - Settings → Claude connector → **Turn off and restore my settings** puts both files back exactly as they were.
-- Uninstalling does the same automatically, then removes the app's data from `%LOCALAPPDATA%\StatusIsland`.
+- Uninstalling (Windows Settings → Apps) does the same automatically, then removes the app's data from `%LOCALAPPDATA%\StatusIsland`.
 
 ## Docs
 

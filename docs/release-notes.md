@@ -35,6 +35,6 @@ You can check an installer with [VirusTotal](https://www.virustotal.com/gui/home
 ### Still to verify
 - Install on an ARM64 laptop.
 
-### Known preview limits
+### Known limits
 - The Claude Connect-screen self-check does not yet independently verify the VS Code wrapper's parent process or distinguish every failure reason.
 - A dedicated Windows suspend notification is not wired; resume behavior needs an owner-PC check.
