@@ -45,9 +45,10 @@ export function Connect() {
   }
 
   const claudeLive = !!snapshot.claude.fiveHour && snapshot.claude.fiveHour.freshness === 'exact';
+  // Claude tabs opened before the switch was turned on can't report; that only needs fixing once.
   const claudeText = !claudeOn ? 'Live limits in terminal and VS Code'
     : claudeLive ? 'Live limits in terminal and VS Code · live ✓'
-    : "On · waiting for Claude's next reply";
+    : 'On · reload VS Code once (Ctrl+Shift+P → Reload Window) so open Claude tabs report';
   const codexLive = !!snapshot.codex.fiveHour || snapshot.sessions.some(s => s.kind === 'codex');
   const openCodeLive = !!snapshot.opencodeToday || snapshot.sessions.some(s => s.kind === 'openCode');
 
