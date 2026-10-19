@@ -1,3 +1,7 @@
+// GUI subsystem: no console window when the island starts. The --statusline and wrap modes
+// still use the stdin/stdout pipes Claude Code and VS Code hand them.
+#![cfg_attr(not(debug_assertions), windows_subsystem = "windows")]
+
 mod engine;
 mod fullscreen;
 mod overlay;
