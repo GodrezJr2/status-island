@@ -109,7 +109,8 @@ fn dead_pid_hidden() {
 }
 
 /// Records what the scanner asks, and treats only one creation time as the live process.
-struct FakeProbe(std::sync::Arc<std::sync::Mutex<Vec<(u32, Option<String>)>>>);
+type ProbeCalls = std::sync::Arc<std::sync::Mutex<Vec<(u32, Option<String>)>>>;
+struct FakeProbe(ProbeCalls);
 impl si_core::scan::ProcessProbe for FakeProbe {
     fn is_live(&self, pid: u32, proc_start: Option<&str>) -> bool {
         self.0

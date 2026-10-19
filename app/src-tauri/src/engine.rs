@@ -66,20 +66,33 @@ pub fn start(app: AppHandle, state: SnapshotState) {
         let mut scanner =
             Scanner::with_probe(roots, Box::new(status_island::procprobe::Win32Probe));
         let mut alerts = AlertEngine::default();
+        // Scan when files change (at most once a second) plus a 5 s heartbeat. The front end
+        // runs its own clock for countdowns, so blind per-second rescans aren't needed.
+        let mut last_scan: Option<std::time::Instant> = None;
+        let mut pending = true;
         loop {
             let signal = rx.recv_timeout(Duration::from_secs(1));
-            let woke = signal.is_ok();
+            if signal.is_ok() {
+                pending = true;
+            }
             if let Ok(Signal::External(reading)) = signal {
                 scanner.ingest_external(reading);
             }
             while let Ok(next) = rx.try_recv() {
+                pending = true;
                 if let Signal::External(reading) = next {
                     scanner.ingest_external(reading);
                 }
             }
-            if woke {
-                std::thread::sleep(Duration::from_millis(150));
+            let since = last_scan.map(|t| t.elapsed()).unwrap_or(Duration::MAX);
+            let due =
+                since >= Duration::from_secs(5) || (pending && since >= Duration::from_secs(1));
+            if !due {
+                continue;
             }
+            std::thread::sleep(Duration::from_millis(150));
+            pending = false;
+            last_scan = Some(std::time::Instant::now());
             let now_ms = SystemTime::now()
                 .duration_since(UNIX_EPOCH)
                 .map(|d| d.as_millis() as i64)
