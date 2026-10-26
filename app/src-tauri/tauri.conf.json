@@ -18,7 +18,7 @@
   "bundle": {
     "active": true,
     "targets": ["nsis"],
-    "createUpdaterArtifacts": true,
+    "createUpdaterArtifacts": false,
     "icon": ["icons/32x32.png", "icons/128x128.png", "icons/128x128@2x.png", "icons/icon.ico"],
     "publisher": "Sheikh Mohammad Hossain",
     "copyright": "© 2026 Sheikh Mohammad Hossain. MIT licence.",

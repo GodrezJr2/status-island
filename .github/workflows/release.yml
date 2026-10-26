@@ -75,7 +75,7 @@ jobs:
           if ($exe.Count -ne 1) { throw "expected one installer, found $($exe.Count)" }
           New-Item -ItemType Directory -Force dist | Out-Null
           Copy-Item $exe[0].FullName dist/StatusIsland-${{ matrix.arch }}-setup.exe
-          Copy-Item "$($exe[0].FullName).sig" dist/StatusIsland-${{ matrix.arch }}-setup.exe.sig
+          if (Test-Path "$($exe[0].FullName).sig") { Copy-Item "$($exe[0].FullName).sig" dist/StatusIsland-${{ matrix.arch }}-setup.exe.sig }
       - uses: actions/upload-artifact@v4
         with:
           name: installer-${{ matrix.arch }}
