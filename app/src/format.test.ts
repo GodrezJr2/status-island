@@ -1,5 +1,13 @@
 import { describe, expect, it } from 'vitest';
-import { fmtReset, fmtTokens } from './format';
+import { fmtRate, fmtReset, fmtTokens } from './format';
+
+describe('fmtRate', () => {
+  it('shows tokens per minute as tok/s', () => {
+    expect(fmtRate(0)).toBe('0.0 tok/s');
+    expect(fmtRate(300)).toBe('5.0 tok/s');
+    expect(fmtRate(36_000)).toBe('600 tok/s');
+  });
+});
 
 describe('formatting', () => {
   it('shows reset time at useful precision', () => {

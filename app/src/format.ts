@@ -24,4 +24,10 @@ export function fmtTokens(n: number): string {
   return String(n);
 }
 
+/** Tokens per minute shown as tokens per second. */
+export function fmtRate(perMin: number): string {
+  const perSec = perMin / 60;
+  return `${perSec >= 10 ? Math.round(perSec) : perSec.toFixed(1)} tok/s`;
+}
+
 function trim(n: number): string { return n >= 100 ? Math.round(n).toString() : n.toFixed(1).replace(/\.0$/, ''); }

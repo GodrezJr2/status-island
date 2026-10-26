@@ -1,6 +1,6 @@
 import { Glyph } from './Glyph';
 import { MetricLine } from './MetricLine';
-import { fmtAge, fmtReset, fmtTokens } from './format';
+import { fmtAge, fmtRate, fmtReset, fmtTokens } from './format';
 import { agentName, levelOf } from './status';
 import { colors, levelColor } from './tokens';
 import type { AccountLimits, SessionView, Snapshot, WindowView } from './types';
@@ -37,7 +37,7 @@ export function AgentCard({ session, snapshot, now }: { session: SessionView; sn
           <MetricLine label="Tokens" value={fmtTokens(session.spend.sessionTokens)} detail="no plan limit (API key)"/>
         </>
       : <MetricLine label="Burn" value={five && five.burnPtsPerMin > 0 ? `${five.burnPtsPerMin.toFixed(1)}%/min` : 'steady'}
-          detail={`${fmtTokens(session.tokensPerMin)} tokens/min${fast ? ' · draining fast' : ''}`} color={fast ? colors.warn : undefined}/>}
+          detail={`${fmtRate(session.tokensPerMin)}${fast ? ' · draining fast' : ''}`} color={fast ? colors.warn : undefined}/>}
     {five?.usedElsewherePts != null && five.usedElsewherePts >= 2 && <div className="card-note">+{Math.round(five.usedElsewherePts)}% used elsewhere (web, phone or another PC)</div>}
   </section>;
 }
